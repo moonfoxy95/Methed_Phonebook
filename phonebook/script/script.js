@@ -126,27 +126,28 @@ const data = [
         <input class="form-input" name="phone" id="phone" type="number" required>
       </div>
       `);
-      const buttonGroup = createButtonsGroup([
-        {
-          className: 'btn btn-primary mr-3',
-          type: 'submit',
-          text: 'Добавить',
-        },
-        {
-          className: 'btn btn-danger',
-          type: 'reset',
-          text: 'Отмена',
-        },
-      ]);
 
-      form.append(...buttonGroup.btns);
+    const buttonGroup = createButtonsGroup([
+      {
+        className: 'btn btn-primary mr-3',
+        type: 'submit',
+        text: 'Добавить',
+      },
+      {
+        className: 'btn btn-danger',
+        type: 'reset',
+        text: 'Отмена',
+      },
+    ]);
 
-      overlay.append(form);
+    form.append(...buttonGroup.btns);
 
-      return {
-        overlay,
-        form,
-      };
+    overlay.append(form);
+
+    return {
+      overlay,
+      form,
+    };
   };
 
   const createRow = ({ name: firstname, surname, phone }) => {
@@ -168,10 +169,16 @@ const data = [
     const phoneLink = document.createElement('a');
     phoneLink.href = `tel: ${phone}`;
     phoneLink.textContent = phone;
-
+    tr.phoneLink = phoneLink;
     tdPhone.append(phoneLink);
 
-    tr.append(tdDel, tdName, tdSurname, tdPhone);
+    const tdEdit = document.createElement('td');
+    const buttonEdit = document.createElement('button')
+    buttonEdit.textContent = 'Редактировать';
+    buttonEdit.classList.add('edit');
+    tdEdit.append(buttonEdit);
+
+    tr.append(tdDel, tdName, tdSurname, tdPhone, tdEdit);
 
     return tr;
   };
@@ -196,7 +203,6 @@ const data = [
 
     return span;
   };
-
 
   const renderPhoneBook = (app, title) => {
     const header = createHeader();
@@ -230,22 +236,73 @@ const data = [
 
     return {
       list: table.tbody,
+      logo,
+      btnAdd: buttonGroup.btns[0],
+      formOverlay: form.overlay,
+      form: form.form,
+      btnClose: document.querySelector('.close'),
     };
   };
 
   const renderContacts = (elem, data) => {
     const allRow = data.map(createRow);
     elem.append(...allRow);
+    return allRow;
+  };
+
+  const hoverRow = (allRow, logo) => {
+    const text = logo.textContent;
+
+    allRow.forEach((contact) => {
+      contact.addEventListener('mouseenter', () => {
+        logo.textContent = contact.phoneLink.textContent;
+      });
+      contact.addEventListener('mouseleave', () => {
+        logo.textContent = text;
+      });
+    });
   };
 
   const init = (selectorApp, title) => {
     const app = document.querySelector(selectorApp);
     const phoneBook = renderPhoneBook(app, title);
 
-    const { list } = phoneBook;
+    const { list, logo, btnAdd, formOverlay, form, btnClose } = phoneBook;
 
-    renderContacts(list, data);
     // Функционал
+    const allRow = renderContacts(list, data);
+    hoverRow(allRow, logo);
+
+    /* объект-обработчик
+    const objEvent = {
+      // метод объекта-обработчика
+      handleEvent() {
+        formOverlay.classList.add('is-visible');
+      },
+    };
+
+    btnAdd.addEventListener('click', objEvent);
+    */
+
+    btnAdd.addEventListener('click', () => {
+      formOverlay.classList.add('is-visible');
+    });
+
+    // форма не закрывается при клике на нее
+    form.addEventListener('click', (event) => {
+      event.stopPropagation(); // дает доработать обработчикам элемента
+      //event.stopImmediatePropagation(); // остановливает все обработчики
+    });
+
+    // форма закрывается при клике вне ее
+    formOverlay.addEventListener('click', () => {
+      formOverlay.classList.remove('is-visible');
+    });
+
+    // форма закрывается при клике на крестик
+    btnClose.addEventListener('click', () => {
+      formOverlay.classList.remove('is-visible');
+    });
   };
 
   window.phoneBookInit = init;
