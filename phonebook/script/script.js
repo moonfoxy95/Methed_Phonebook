@@ -152,6 +152,7 @@ const data = [
 
   const createRow = ({ name: firstname, surname, phone }) => {
     const tr = document.createElement('tr');
+    tr.classList.add('contact');
 
     const tdDel = document.createElement('td');
     tdDel.classList.add('delete');
@@ -238,6 +239,7 @@ const data = [
       list: table.tbody,
       logo,
       btnAdd: buttonGroup.btns[0],
+      btnDel: buttonGroup.btns[1],
       formOverlay: form.overlay,
       form: form.form,
       btnClose: document.querySelector('.close'),
@@ -267,7 +269,14 @@ const data = [
     const app = document.querySelector(selectorApp);
     const phoneBook = renderPhoneBook(app, title);
 
-    const { list, logo, btnAdd, formOverlay, form, btnClose } = phoneBook;
+    const { 
+      list, 
+      logo, 
+      btnAdd, 
+      formOverlay, 
+      form, 
+      btnClose,
+      btnDel, } = phoneBook;
 
     // Функционал
     const allRow = renderContacts(list, data);
@@ -288,21 +297,41 @@ const data = [
       formOverlay.classList.add('is-visible');
     });
 
+    /*
     // форма не закрывается при клике на нее
     form.addEventListener('click', (event) => {
       event.stopPropagation(); // дает доработать обработчикам элемента
       //event.stopImmediatePropagation(); // остановливает все обработчики
     });
+    */
 
-    // форма закрывается при клике вне ее
-    formOverlay.addEventListener('click', () => {
-      formOverlay.classList.remove('is-visible');
+    // форма закрывается при клике вне ее [ДЕЛЕГИРОВАНИЕ]
+    formOverlay.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target === formOverlay ||
+          target === btnClose // или target.classList.contains('close') или target.closest('.close')
+      ) {
+        formOverlay.classList.remove('is-visible');
+      }
     });
 
     // форма закрывается при клике на крестик
     btnClose.addEventListener('click', () => {
       formOverlay.classList.remove('is-visible');
     });
+
+    btnDel.addEventListener('click', () => {
+      document.querySelectorAll('.delete').forEach(del => {
+        del.classList.toggle('is-visible');
+      });
+    });
+
+    // или classList.contains('')
+    list.addEventListener('click', e => {
+      if (e.target.closest('.del-icon')) {
+        e.target.closest('.contact').remove();
+      }
+    })
   };
 
   window.phoneBookInit = init;

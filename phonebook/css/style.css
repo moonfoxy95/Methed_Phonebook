@@ -39,7 +39,7 @@ body {
 }
 
 .delete.is-visible {
-  width: 10px;
+  width: 5px;
   display: table-cell;
 }
 
